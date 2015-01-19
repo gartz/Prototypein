@@ -1,10 +1,15 @@
 function Prototypein( context, dependencies ){
-  "use strict";
 
   if( this instanceof Prototypein ){
     return createInheritance.apply( this, arguments );
   }
-  return assertInheritance.apply( this, arguments );
+  var args;
+  if( arguments.length > 1 ){
+    args = Array.prototype.slice.apply( arguments, 1 );
+    return assertInheritance.apply( arguments[0], args );
+  }
+  args = arguments.callee.caller.depends || [];
+  return assertInheritance.apply( arguments[0], args );
 
   function assertInheritance( context, dependencies ){
     if( !dependencies ) return true;
