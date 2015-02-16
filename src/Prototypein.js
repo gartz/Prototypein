@@ -5,32 +5,37 @@ function Prototypein( context, dependencies ){
   }
   var args;
   if( arguments.length > 1 ){
-    args = Array.prototype.slice.apply( arguments, 1 );
-    return assertInheritance.apply( arguments[0], args );
+    return assertInheritance.apply( null, arguments );
   }
-  args = arguments.callee.caller.depends || [];
-  return assertInheritance.apply( arguments[0], args );
+  if( context instanceof arguments.callee.caller ){
+    args = arguments.callee.caller.depends || [];
+    if( context.constructor === args[0] ) return false;
+  }
+  if( context instanceof context.constructor ){
+    args = context.constructor.depends;
+  }
+  return assertInheritance( arguments[0], args );
 
   function assertInheritance( context, dependencies ){
+    "use strict";
     if( !dependencies ) return true;
     if( !( dependencies instanceof Array ) ){
       //TODO: Add IE7 support?
       dependencies = Array.prototype.slice.call( arguments, 1 );
     }
     for( var i = 0, m = dependencies.length; i < m; i++ ){
-      if( !( context instanceof dependencies[i] ) ){
-        for( var parent = context; parent; ){
-          if( parent.constructor === dependencies[i] ) break;
-          else parent = parent.getOwnPrototype && parent.getOwnPrototype();
-        }
-        if( !parent ) return false;
+      for( var parent = context; parent; ){
+        if( parent.constructor === dependencies[i] ) break;
+        else parent = parent.getOwnPrototype && parent.getOwnPrototype();
       }
+      if( !parent ) return false;
     }
 
     return true;
   }
 
   function createInheritance( chain ){
+    "use strict";
     if( !( chain instanceof Array ) ){
       //TODO: Add IE7 support?
       chain = Array.prototype.slice.call( arguments );
